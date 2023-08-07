@@ -2,6 +2,7 @@ import argparse
 import functools
 import itertools
 import os
+import os.path as osp
 
 import cameralib
 import more_itertools
@@ -19,7 +20,7 @@ from humcentr_cli.util import improc, videoproc
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model-path', type=str, required=True)
+    parser.add_argument('--model-path', type=str, default='https://bit.ly/metrabs_l')
     parser.add_argument('--video-dir', type=str)
     parser.add_argument('--file-pattern', type=str, default='**/*.mp4')
     parser.add_argument('--videos-per-task', type=int, default=1)
@@ -59,18 +60,18 @@ def main():
     except KeyError:
         pass
     # random.shuffle(video_paths)
-    relpaths = [os.path.relpath(video_path, FLAGS.video_dir) for video_path in video_paths]
+    relpaths = [osp.relpath(video_path, FLAGS.video_dir) for video_path in video_paths]
     camera_tracks = get_camera_calibrations(relpaths)
 
     output_paths = [
-        f'{FLAGS.output_dir}/{os.path.splitext(relpath)[0]}{FLAGS.suffix}.pkl'
+        f'{FLAGS.output_dir}/{osp.splitext(relpath)[0]}{FLAGS.suffix}.pkl'
         for relpath in relpaths]
     output_video_paths = [
-        f'{FLAGS.output_dir}/{os.path.splitext(relpath)[0]}{FLAGS.suffix}.mp4'
+        f'{FLAGS.output_dir}/{osp.splitext(relpath)[0]}{FLAGS.suffix}.mp4'
         for relpath in relpaths]
 
     if (all(spu.is_pickle_readable(p) for p in output_paths) and
-            (not FLAGS.write_video or all(os.path.exists(p) for p in output_video_paths))):
+            (not FLAGS.write_video or all(osp.exists(p) for p in output_video_paths))):
         print('All done')
         return
 
@@ -105,7 +106,7 @@ def main():
     for video_path, output_path, output_video_path, camera_track in zip(
             video_paths, output_paths, output_video_paths, camera_tracks):
         if (spu.is_pickle_readable(output_path) and
-                (not FLAGS.write_video or os.path.exists(output_video_path))):
+                (not FLAGS.write_video or osp.exists(output_video_path))):
             continue
         print(video_path)
 

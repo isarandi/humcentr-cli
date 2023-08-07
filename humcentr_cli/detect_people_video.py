@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import os.path as osp
 
 import simplepyutils as spu
 import simplepyutils.argparse as spu_argparse
@@ -31,10 +32,10 @@ def main():
     video_paths = sorted([x for l in globs for x in l])
     i_task = int(os.environ['SLURM_ARRAY_TASK_ID'])
     video_paths = video_paths[i_task * FLAGS.videos_per_task:(i_task + 1) * FLAGS.videos_per_task]
-    relpaths = [os.path.relpath(video_path, FLAGS.video_dir) for video_path in video_paths]
-    output_paths = [f'{FLAGS.output_dir}/{os.path.splitext(relpath)[0]}.pkl'
+    relpaths = [osp.relpath(video_path, FLAGS.video_dir) for video_path in video_paths]
+    output_paths = [f'{FLAGS.output_dir}/{osp.splitext(relpath)[0]}.pkl'
                     for relpath in relpaths]
-    if all(os.path.exists(p) for p in output_paths):
+    if all(osp.exists(p) for p in output_paths):
         return
 
     video_slice = slice(0, None, FLAGS.every_nth_frame)
@@ -42,7 +43,7 @@ def main():
 
     for video_path, output_path in zip(video_paths, output_paths):
         print(video_path)
-        if os.path.exists(output_path):
+        if osp.exists(output_path):
             continue
 
         preds = []

@@ -4,6 +4,7 @@ import argparse
 import glob
 import math
 import os
+import os.path as osp
 
 import more_itertools
 import rlemasklib
@@ -29,7 +30,7 @@ def main():
     i_task = int(os.environ['SLURM_ARRAY_TASK_ID'])
     result_path = f'{FLAGS.out_dir}/masks_{i_task:06d}.pkl'
 
-    if os.path.exists(result_path):
+    if osp.exists(result_path):
         return
 
     globs = [glob.glob(f'{FLAGS.image_root}/{p}', recursive=True)
@@ -50,7 +51,7 @@ def main():
     for impaths_batch, frames_batch in zip(impath_batches, frame_batches):
         masks_batch = segment_batch(model, frames_batch)
         for impath, mask in zip(impaths_batch, masks_batch):
-            relpath = os.path.relpath(impath, FLAGS.image_root)
+            relpath = osp.relpath(impath, FLAGS.image_root)
             results[relpath] = rlemasklib.encode(mask.numpy())
 
     spu.dump_pickle(results, result_path)

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='humcentr-cli',
-    version='0.1.0',
+    version='0.1.1',
     author='István Sárándi',
     author_email='istvan.sarandi@uni-tuebingen.de',
     packages=['humcentr_cli'],

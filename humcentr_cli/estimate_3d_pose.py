@@ -2,6 +2,7 @@ import argparse
 import functools
 import itertools
 import os
+import os.path as osp
 
 import cameralib
 import more_itertools
@@ -12,20 +13,19 @@ import simplepyutils.argparse as spu_argparse
 import tensorflow as tf
 import tensorflow_hub as tfhub
 import tensorflow_inputs as tfinp
-from simplepyutils.argparse import FLAGS
-
 from humcentr_cli.detect_people import get_task_chunk
+from simplepyutils.argparse import FLAGS
 
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--model-path', type=str, default='https://bit.ly/metrabs_l')
     parser.add_argument('--image-root', type=str, required=True)
     parser.add_argument('--ignore-paths-file', type=str)
     parser.add_argument('--out-path', type=str, required=True)
     parser.add_argument('--file-pattern', type=str, default='**/*.jpg')
     parser.add_argument('--images-per-task', type=int, default=10000)
     parser.add_argument('--image-type', type=str, default='jpg')
-    parser.add_argument('--model-path', type=str, required=True)
     parser.add_argument('--batch-size', type=int, default=64)
     parser.add_argument('--camera-intrinsics-file', type=str)
     parser.add_argument('--camera-file', type=str)
@@ -46,7 +46,7 @@ def main():
 
     image_relpaths = get_image_relpaths()
     image_relpaths, out_path = get_task_chunk(image_relpaths)
-    if os.path.exists(out_path) or not image_relpaths:
+    if osp.exists(out_path) or not image_relpaths:
         return
 
     model = tfhub.load(FLAGS.model_path)
@@ -112,7 +112,7 @@ def get_image_relpaths():
     globs = [spu.sorted_recursive_glob(f'{FLAGS.image_root}/{p}')
              for p in FLAGS.file_pattern.split(',')]
     image_paths = sorted([x for l in globs for x in l])
-    image_relpaths = [os.path.relpath(p, FLAGS.image_root) for p in image_paths]
+    image_relpaths = [osp.relpath(p, FLAGS.image_root) for p in image_paths]
     ignore_relpaths = set(
         spu.read_file(FLAGS.ignore_paths_file).splitlines() if FLAGS.ignore_paths_file else [])
     image_relpaths = sorted([p for p in image_relpaths if p not in ignore_relpaths])

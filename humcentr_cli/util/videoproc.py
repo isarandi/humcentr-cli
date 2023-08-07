@@ -16,7 +16,7 @@ def get_fps(filepath):
 
 
 def transform(inp_path, out_path, process_frame_fn, **kwargs):
-    spu.ensure_path_exists(out_path)
+    spu.ensure_parent_dir_exists(out_path)
     with imageio.get_reader(inp_path) as reader:
         fps = reader.get_meta_data()['fps']
         n_frames = num_frames(inp_path)

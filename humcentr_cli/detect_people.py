@@ -1,6 +1,7 @@
 """Runs person bounding box detection in image files and saves the results."""
 import argparse
 import os
+import os.path as osp
 
 import more_itertools
 import simplepyutils as spu
@@ -32,7 +33,7 @@ def main():
         glob_lists = [spu.sorted_recursive_glob(f'{FLAGS.image_root}/{p}')
                       for p in FLAGS.file_pattern.split(',')]
         image_paths = sorted([x for glob_list in glob_lists for x in glob_list])
-        image_relpaths = [os.path.relpath(p, FLAGS.image_root) for p in image_paths]
+        image_relpaths = [osp.relpath(p, FLAGS.image_root) for p in image_paths]
     else:
         image_relpaths = spu.read_lines(FLAGS.image_paths_file)
 
@@ -41,7 +42,7 @@ def main():
     image_relpaths = sorted([p for p in image_relpaths
                              if p not in ignore_relpaths and 'stitched' not in p])
     image_relpaths, out_path = get_task_chunk(image_relpaths)
-    if os.path.exists(out_path):
+    if osp.exists(out_path):
         return
     if not image_relpaths:
         return
@@ -81,7 +82,7 @@ def get_task_chunk(image_paths):
     if 'SLURM_ARRAY_TASK_ID' not in os.environ:
         return image_paths, FLAGS.out_path
     i_task = int(os.environ['SLURM_ARRAY_TASK_ID'])
-    noext, ext = os.path.splitext(FLAGS.out_path)
+    noext, ext = osp.splitext(FLAGS.out_path)
     out_path = f'{noext}_{i_task:06d}{ext}'
     task_impaths = image_paths[i_task * FLAGS.images_per_task:(i_task + 1) * FLAGS.images_per_task]
     return task_impaths, out_path
